@@ -1,0 +1,124 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const mockChains = Array.from({ length: 100 }, (_, i) => ({
+  id: i + 1,
+  name: `Chain ${i + 1}`,
+  performance: Math.random() * 100,
+}));
+
+const mockNews = [
+  {
+    id: 1,
+    title: "Chain 1 sets performance record",
+    source: "CoinDesk",
+    chain: "Chain 1",
+    content: "Chain 1 has outperformed all competitors this week.",
+  },
+  {
+    id: 2,
+    title: "Chain 20 partners with DeFi platform",
+    source: "CoinTelegraph",
+    chain: "Chain 20",
+    content: "A major DeFi partnership boosts Chain 20's visibility.",
+  },
+  {
+    id: 3,
+    title: "Chain 50 announces upgrade",
+    source: "Twitter",
+    chain: "Chain 50",
+    content: "Chain 50 reveals a major scalability upgrade on Twitter.",
+  },
+];
+
+export default function Dashboard() {
+  const [selectedChain, setSelectedChain] = useState("");
+  const [savedNews, setSavedNews] = useState([]);
+  const [query, setQuery] = useState("");
+
+  const handleSave = (news) => {
+    if (!savedNews.find((item) => item.id === news.id)) {
+      setSavedNews([...savedNews, news]);
+    }
+  };
+
+  const filteredNews = mockNews.filter(
+    (item) =>
+      (item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.content.toLowerCase().includes(query.toLowerCase())) &&
+      (selectedChain === "" || item.chain === selectedChain)
+  );
+
+  return (
+    <div className="p-4 space-y-6">
+      <h1 className="text-3xl font-bold">Top 100 Blockchain Chains Dashboard</h1>
+
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <Input
+          placeholder="Search news..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="max-w-md"
+        />
+        <Tabs defaultValue="" onValueChange={(val) => setSelectedChain(val)}>
+          <TabsList className="overflow-x-auto">
+            <TabsTrigger value="">All</TabsTrigger>
+            {mockChains.slice(0, 10).map((chain) => (
+              <TabsTrigger key={chain.id} value={chain.name}>{chain.name}</TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Top Performing Chains</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {mockChains
+            .sort((a, b) => b.performance - a.performance)
+            .slice(0, 20)
+            .map((chain) => (
+              <Card key={chain.id}>
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-medium">{chain.name}</h3>
+                  <p>Performance: {chain.performance.toFixed(2)}%</p>
+                </CardContent>
+              </Card>
+            ))}
+        </div>
+      </div>
+
+      <div className="pt-8">
+        <h2 className="text-2xl font-semibold mb-4">Chain News</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredNews.map((news) => (
+            <Card key={news.id}>
+              <CardContent className="p-4 space-y-2">
+                <h3 className="text-xl font-semibold">{news.title}</h3>
+                <p className="text-sm text-gray-600">{news.source} | {news.chain}</p>
+                <p>{news.content}</p>
+                <Button onClick={() => handleSave(news)}>Save</Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div className="pt-8">
+        <h2 className="text-2xl font-semibold mb-4">Saved News</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {savedNews.map((item) => (
+            <Card key={item.id}>
+              <CardContent className="p-4 space-y-2">
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p>{item.content}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
