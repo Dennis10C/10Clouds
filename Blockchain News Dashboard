@@ -1,0 +1,101 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEffect } from "react";
+
+const mockNews = [
+  {
+    id: 1,
+    title: "Ethereum reaches new all-time high",
+    source: "CoinDesk",
+    topic: "Ethereum",
+    content: "Ethereum surged past $5,000 for the first time.",
+  },
+  {
+    id: 2,
+    title: "Bitcoin ETF approved by SEC",
+    source: "CoinTelegraph",
+    topic: "Bitcoin",
+    content: "SEC gives green light to first US-based Bitcoin ETF.",
+  },
+  {
+    id: 3,
+    title: "Vitalik Buterin talks crypto future",
+    source: "Twitter",
+    topic: "Ethereum",
+    content: "Vitalik tweets about the evolution of decentralized tech.",
+  },
+];
+
+export default function Dashboard() {
+  const [filter, setFilter] = useState("");
+  const [saved, setSaved] = useState([]);
+  const [query, setQuery] = useState("");
+
+  const handleSave = (news) => {
+    if (!saved.find((item) => item.id === news.id)) {
+      setSaved([...saved, news]);
+    }
+  };
+
+  const filteredNews = mockNews.filter(
+    (item) =>
+      (item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.content.toLowerCase().includes(query.toLowerCase())) &&
+      (filter === "" || item.topic === filter || item.source === filter)
+  );
+
+  return (
+    <div className="p-4 space-y-6">
+      <h1 className="text-3xl font-bold">Blockchain News Dashboard</h1>
+
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <Input
+          placeholder="Search news..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="max-w-md"
+        />
+
+        <Tabs defaultValue="" onValueChange={(val) => setFilter(val)}>
+          <TabsList>
+            <TabsTrigger value="">All</TabsTrigger>
+            <TabsTrigger value="Bitcoin">Bitcoin</TabsTrigger>
+            <TabsTrigger value="Ethereum">Ethereum</TabsTrigger>
+            <TabsTrigger value="CoinDesk">CoinDesk</TabsTrigger>
+            <TabsTrigger value="Twitter">Twitter</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredNews.map((news) => (
+          <Card key={news.id}>
+            <CardContent className="p-4 space-y-2">
+              <h2 className="text-xl font-semibold">{news.title}</h2>
+              <p className="text-sm text-gray-600">{news.source} | {news.topic}</p>
+              <p>{news.content}</p>
+              <Button onClick={() => handleSave(news)}>Save</Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="pt-8">
+        <h2 className="text-2xl font-bold mb-2">Saved Articles</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {saved.map((item) => (
+            <Card key={item.id}>
+              <CardContent className="p-4 space-y-2">
+                <h2 className="text-xl font-semibold">{item.title}</h2>
+                <p>{item.content}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
